@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arjun Farms - Milk Sale & Purchase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        select, input[type="date"], input[type="tel"], button {
+            padding: 10px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+
+        .inline {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        /* Print styles */
+        @media print {
+            button, select, .buttons, label[for="transaction-type"] {
+                display: none;
+            }
+            td:nth-child(5), th:nth-child(5) {
+                display: none;
+            }
+            /* Ensure main phone number, date, and table details are visible */
+            #main-phone, #date {
+                display: inline !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Arjun Farms - Milk Sale & Purchase</h1>
+    
+    <div>
+        <label for="main-phone">Main Phone Number:</label>
+        <input type="tel" id="main-phone" placeholder="Main Phone Number">
+        
+        <label for="date">Date:</label>
+        <input type="date" id="date">
+    </div>
+    
+    <label for="transaction-type">Choose Transaction Type:</label>
+    <select id="transaction-type" onchange="toggleTables()">
+        <option value="">Select</option>
+        <option value="purchase">Purchase</option>
+        <option value="sale">Sale</option>
+    </select>
+
+    <!-- Purchase Table -->
+    <div id="purchase-section" class="hidden">
+        <h2>Purchase Milk</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Seller Name</th>
+                    <th>Phone Number</th>
+                    <th>Milk Quantity (Liters)</th>
+                    <th>Price (₹)</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody id="purchase-table-body">
+                <!-- Dynamic rows will be added here -->
+            </tbody>
+        </table>
+        <button onclick="addRow('purchase')">Add Purchase</button>
+        <div class="buttons">
+            <button onclick="calculateTotal('purchase')">Total Milk Quantity & Price (Purchase)</button>
+        </div>
+        <p id="purchase-total"></p> <!-- Display total for Purchase -->
+    </div>
+
+    <!-- Sale Table -->
+    <div id="sale-section" class="hidden">
+        <h2>Sell Milk</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Buyer Name</th>
+                    <th>Phone Number</th>
+                    <th>Milk Quantity (Liters)</th>
+                    <th>Price (₹)</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody id="sale-table-body">
+                <!-- Dynamic rows will be added here -->
+            </tbody>
+        </table>
+        <button onclick="addRow('sale')">Add Sale</button>
+        <div class="buttons">
+            <button onclick="calculateTotal('sale')">Total Milk Quantity & Price (Sale)</button>
+        </div>
+        <p id="sale-total"></p> <!-- Display total for Sale -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        <button onclick="printPage()">Print</button>
+        <button onclick="shareOnWhatsApp()">Share on WhatsApp</button>
+    </div>
+</div>
+
+<script>
+    // Global variables to hold total quantities and prices
+    let totalPurchaseQuantity = 0;
+    let totalPurchasePrice = 0;
+    let totalSaleQuantity = 0;
+    let totalSalePrice = 0;
+
+    function toggleTables() {
+        var transactionType = document.getElementById('transaction-type').value;
+        document.getElementById('purchase-section').classList.add('hidden');
+        document.getElementById('sale-section').classList.add('hidden');
+
+        if (transactionType === 'purchase') {
+            document.getElementById('purchase-section').classList.remove('hidden');
+        } else if (transactionType === 'sale') {
+            document.getElementById('sale-section').classList.remove('hidden');
+        }
+    }
+
+    function addRow(type) {
+        var tableBody;
+        if (type === 'purchase') {
+            tableBody = document.getElementById('purchase-table-body');
+        } else {
+            tableBody = document.getElementById('sale-table-body');
+        }
+
+        var row = document.createElement('tr');
+
+        var nameCell = document.createElement('td');
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.placeholder = type === 'purchase' ? 'Seller Name' : 'Buyer Name';
+        nameCell.appendChild(nameInput);
+
+        var phoneCell = document.createElement('td');
+        var phoneInput = document.createElement('input');
+        phoneInput.type = 'tel';
+        phoneInput.placeholder = 'Phone Number';
+        phoneCell.appendChild(phoneInput);
+
+        var quantityCell = document.createElement('td');
+        var quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.placeholder = 'Milk Quantity (Liters)';
+        quantityCell.appendChild(quantityInput);
+
+        var priceCell = document.createElement('td');
+        var priceInput = document.createElement('input');
+        priceInput.type = 'number';
+        priceInput.placeholder = 'Price (₹)';
+        priceCell.appendChild(priceInput);
+
+        var removeCell = document.createElement('td');
+        var removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove';
+        removeButton.onclick = function() {
+            row.remove();
+            calculateTotal(type); // Recalculate totals when a row is removed
+        };
+        removeCell.appendChild(removeButton);
+
+        row.appendChild(nameCell);
+        row.appendChild(phoneCell);
+        row.appendChild(quantityCell);
+        row.appendChild(priceCell);
+        row.appendChild(removeCell);
+
+        tableBody.appendChild(row);
+    }
+
+    function printPage() {
+        window.print();
+    }
+
+    function shareOnWhatsApp() {
+        var mainPhone = document.getElementById('main-phone').value;
+        var date = document.getElementById('date').value;
+        var transactionType = document.getElementById('transaction-type').value;
+        var message = "Milk Transaction Details for " + date + ":\nMain Phone Number: " + mainPhone + "\n";
+
+        // Append total details to the message
+        if (transactionType === 'purchase') {
+            message += "Total Milk Quantity: " + totalPurchaseQuantity + " Liters, Total Price: ₹" + totalPurchasePrice + "\n";
+            message += "Purchase Details:\n";
+            var rows = document.getElementById('purchase-table-body').getElementsByTagName('tr');
+        } else {
+            message += "Total Milk Quantity: " + totalSaleQuantity + " Liters, Total Price: ₹" + totalSalePrice + "\n";
+            message += "Sale Details:\n";
+            var rows = document.getElementById('sale-table-body').getElementsByTagName('tr');
+        }
+
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            var name = cells[0].getElementsByTagName('input')[0].value;
+            var phone = cells[1].getElementsByTagName('input')[0].value;
+            var quantity = cells[2].getElementsByTagName('input')[0].value;
+            var price = cells[3].getElementsByTagName('input')[0].value;
+
+            message += "Name: " + name + "\nPhone: " + phone + "\nMilk Quantity: " + quantity + "L \nPrice: ₹" + price + "\n";
+        }
+
+        var whatsappUrl = "https://api.whatsapp.com/send?phone=" + mainPhone + "&text=" + encodeURIComponent(message);
+        window.open(whatsappUrl);
+    }
+
+    function calculateTotal(type) {
+        var totalQuantity = 0;
+        var totalPrice = 0;
+        var tableBody;
+
+        if (type === 'purchase') {
+            tableBody = document.getElementById('purchase-table-body');
+        } else {
+            tableBody = document.getElementById('sale-table-body');
+        }
+
+        var rows = tableBody.getElementsByTagName('tr');
+
+        for (var i = 0; i < rows.length; i++) {
+            var cells = rows[i].getElementsByTagName('td');
+            var quantity = cells[2].getElementsByTagName('input')[0].value;
+            var price = cells[3].getElementsByTagName('input')[0].value;
+
+            totalQuantity += parseFloat(quantity) || 0;
+            totalPrice += parseFloat(price) || 0;
+        }
+
+        if (type === 'purchase') {
+            totalPurchaseQuantity = totalQuantity;
+            totalPurchasePrice = totalPrice;
+            document.getElementById('purchase-total').innerText = "Total Milk Quantity: " + totalQuantity + " Liters, Total Price: ₹" + totalPrice;
+        } else {
+            totalSaleQuantity = totalQuantity;
+            totalSalePrice = totalPrice;
+            document.getElementById('sale-total').innerText = "Total Milk Quantity: " + totalQuantity + " Liters, Total Price: ₹" + totalPrice;
+        }
+    }
+</script>
+
+</body>
+</html>
